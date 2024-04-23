@@ -1,0 +1,19 @@
+{
+  "name": "arbispotter-gateway",
+  "version": "1.0.0",
+  "description": "'Connection Gateway'",
+  "main": "/src/server.js",
+  "repository": "https://github.com/MaxLiebsch/arbispotter-gateway.git",
+  "author": "MaxLiebsch <liebsch@dipmaxexport.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "node ./src/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
