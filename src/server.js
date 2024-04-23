@@ -91,8 +91,6 @@ server.on("connect", (req, clientSocket, head) => {
     `CONNECT ${targetHostPort} HTTP/1.1`,
     `Host: ${targetHostPort}`,
     `Proxy-Authorization: Basic ${proxyAuth}`,
-    "Connection: Keep-Alive",
-    "Keep-Alive: timeout=20, max=1000",
     "",
     "",
   ].join("\r\n");
@@ -191,7 +189,6 @@ const establishedConnection = (
     });
   });
 
-  proxySocket.setTimeout(60000);
 
   proxySocket.on("close", () => {
     delete establishedConnections[targetHostPort];
