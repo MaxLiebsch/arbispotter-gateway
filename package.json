@@ -1,7 +1,7 @@
 {
   "name": "arbispotter-gateway",
   "version": "1.0.0",
-  "description": "'Connection Gateway'",
+  "description": "Connection Gateway",
   "main": "/src/server.js",
   "repository": "https://github.com/MaxLiebsch/arbispotter-gateway.git",
   "author": "MaxLiebsch <liebsch@dipmaxexport.com>",
