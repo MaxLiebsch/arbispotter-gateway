@@ -2,9 +2,9 @@ module.exports = {
   apps: [
     {
       name: "gateway",
-      script: "yarn",
+      script: "/root/.nvm/versions/node/v20.11.1/bin/yarn",
       args: "--cwd '/root/arbispotter-gateway' start",
-      interpreter: "/bin/bash",
+      interpreter: "/root/.nvm/versions/node/v20.11.1/bin/node",
       env: {
         NODE_ENV: "production",
         PROXY_TYPE: "request",
