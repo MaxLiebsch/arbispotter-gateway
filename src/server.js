@@ -1,6 +1,6 @@
 import http from "http";
 import net from "net";
-import {URL} from 'url'
+import { URL } from "url";
 import "dotenv/config";
 import { config } from "dotenv";
 
@@ -11,7 +11,7 @@ config({
 // Define your username and password
 const USERNAME = process.env.BASIC_AUTH_USERNAME;
 const PASSWORD = process.env.BASIC_AUTH_PASSWORD;
-
+const PORT = 8081;
 
 const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
@@ -25,7 +25,6 @@ const proxyHosts = Object.entries(process.env).reduce((acc, [key, host]) => {
   }
   return acc;
 }, []);
-
 
 const numberOfProxies = proxyHosts.length;
 
@@ -49,7 +48,9 @@ const nextProxyUrlStr = () => {
 };
 
 // Create a basic authentication header
-const basicAuthHeader = Buffer.from(`${USERNAME}:${PASSWORD}`).toString("base64");
+const basicAuthHeader = Buffer.from(`${USERNAME}:${PASSWORD}`).toString(
+  "base64"
+);
 
 // Create an HTTP server to handle incoming requests
 const server = http.createServer((req, res) => {
@@ -57,9 +58,8 @@ const server = http.createServer((req, res) => {
   res.end("Forbidden");
 });
 
-// Start the HTTP server on port 8081
-server.listen(8081, () => {
-  console.log("Forward proxy server running on port 8081");
+server.listen(PORT, () => {
+  console.log("Forward proxy server running on port " + "8081");
 });
 
 // Create a TCP server to handle CONNECT requests
@@ -83,6 +83,7 @@ server.on("connect", (req, clientSocket, head) => {
 
   const proxyUrlStr = nextProxyUrlStr();
   const forwardProxyUrl = new URL(proxyUrlStr);
+
   const proxyAuth = Buffer.from(
     `${forwardProxyUrl.username}:${forwardProxyUrl.password}`
   ).toString("base64");
@@ -91,6 +92,7 @@ server.on("connect", (req, clientSocket, head) => {
     `CONNECT ${targetHostPort} HTTP/1.1`,
     `Host: ${targetHostPort}`,
     `Proxy-Authorization: Basic ${proxyAuth}`,
+    "Connection: keep-alive",
     "",
     "",
   ].join("\r\n");
@@ -105,40 +107,11 @@ server.on("connect", (req, clientSocket, head) => {
     head
   );
 
-  // Create a TCP connection to the destination server
-  const serverSocket = net.connect(port || 443, hostname, () => {
-    // Respond to the client with a successful connection
-    clientSocket.write(
-      "HTTP/1.1 200 Connection Established\r\n" +
-        "Proxy-agent: Node.js-Proxy\r\n" +
-        "\r\n"
-    );
-    // Forward data between the client and destination server
-    serverSocket.pipe(clientSocket);
-    clientSocket.pipe(serverSocket);
-  });
-
-  // Handle errors on the server socket
-  serverSocket.on("error", (err) => {
-    console.error("Server socket error:", err);
-    clientSocket.end();
-  });
-
   // Handle errors on the client socket
   clientSocket.on("error", (err) => {
     console.error("Client socket error:", err);
-    serverSocket.end();
   });
 
-  // Handle the end event on the server socket
-  serverSocket.on("end", () => {
-    clientSocket.end();
-  });
-
-  // Handle the end event on the client socket
-  clientSocket.on("end", () => {
-    serverSocket.end();
-  });
 });
 
 const establishedConnection = (
@@ -188,7 +161,6 @@ const establishedConnection = (
       }
     });
   });
-
 
   proxySocket.on("close", () => {
     delete establishedConnections[targetHostPort];
