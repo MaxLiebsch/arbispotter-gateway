@@ -11,7 +11,7 @@ config({
 // Define your username and password
 const USERNAME = process.env.BASIC_AUTH_USERNAME;
 const PASSWORD = process.env.BASIC_AUTH_PASSWORD;
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
 
 const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
