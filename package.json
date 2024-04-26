@@ -6,14 +6,18 @@
   "repository": "https://github.com/MaxLiebsch/arbispotter-gateway.git",
   "author": "MaxLiebsch <liebsch@dipmaxexport.com>",
   "license": "MIT",
-  "type": "module",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node ./src/server.js",
+    "test": "cross-env NODE_ENV=development PROXY_TYPE=request DEBUG=true jest"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "@types/jest": "^29.5.12",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5"
   }
 }

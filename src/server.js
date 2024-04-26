@@ -16,9 +16,6 @@ const PORT = 8081;
 const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
 
-let currProxyIdx = 0;
-let retries = 0;
-
 const proxyHosts = Object.entries(process.env).reduce((acc, [key, host]) => {
   if (key.trim().startsWith("PROXY_HOST_")) {
     acc.push(`http://${PROXY_USERNAME}:${PROXY_PASSWORD}@${host}`);
@@ -26,18 +23,22 @@ const proxyHosts = Object.entries(process.env).reduce((acc, [key, host]) => {
   return acc;
 }, []);
 
-const numberOfProxies = proxyHosts.length;
-
 const establishedConnections = {};
 
+const numberOfProxies = proxyHosts.length;
+let currProxyIdx = 0;
+
 const nextProxyUrlStr = () => {
+  // default one proxy
   if (numberOfProxies === 1) {
     return proxyHosts[0];
   }
-  if (currProxyIdx === numberOfProxies - 1) {
+
+  if (currProxyIdx === 0) {
+    currProxyIdx += 1;
+    return proxyHosts[0];
+  } else if (currProxyIdx === numberOfProxies) {
     currProxyIdx = 0;
-    return proxyHosts[currProxyIdx];
-  } else if (currProxyIdx === 0) {
     currProxyIdx += 1;
     return proxyHosts[0];
   } else {
@@ -97,7 +98,6 @@ server.on("connect", (req, clientSocket, head) => {
     "",
   ].join("\r\n");
 
-  console.log(`Establishing new connection to ${targetHostPort}`);
   // Establish a new connection
   establishedConnection(
     clientSocket,
@@ -111,7 +111,6 @@ server.on("connect", (req, clientSocket, head) => {
   clientSocket.on("error", (err) => {
     console.error("Client socket error:", err);
   });
-
 });
 
 const establishedConnection = (
@@ -139,16 +138,13 @@ const establishedConnection = (
         chunkStr.toLowerCase().includes("ok") ||
         chunkStr.toLowerCase().includes("200")
       ) {
-        console.log("CONNECTED:", targetHostPort);
         clientSocket.write(
           "HTTP/1.1 200 Connection Established\r\nProxy-agent: Genius Proxy\r\n\r\n"
         );
         proxySocket.write(head);
         proxySocket.pipe(clientSocket);
         clientSocket.pipe(proxySocket);
-        // establishedConnections[targetHostPort].connected = true;
       } else {
-        console.log("WELL", chunkStr);
         const responseMessage = "Internal Server Error.";
         const responseHeaders = [
           "HTTP/1.1 500 Internal Server Error",
