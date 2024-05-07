@@ -113,6 +113,12 @@ server.on("connect", (req, clientSocket, head) => {
   });
 });
 
+server.on('error', (error) => {
+  console.log('Proxy Server error:', error)
+})
+
+
+
 const establishedConnection = (
   clientSocket,
   forwardProxyUrl,
@@ -186,3 +192,7 @@ const establishedConnection = (
     clientSocket.end(`${responseHeaders}${responseMessage}`);
   });
 };
+
+process.on('uncaughtException', function (err) {
+  console.log('Proxy Server uncaught Error', err.stack);
+});
