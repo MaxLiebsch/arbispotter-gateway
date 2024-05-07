@@ -144,6 +144,7 @@ const establishedConnection = (
         chunkStr.toLowerCase().includes("ok") ||
         chunkStr.toLowerCase().includes("200")
       ) {
+        console.log('connection established', chunkStr, targetHostPort)
         clientSocket.write(
           "HTTP/1.1 200 Connection Established\r\nProxy-agent: Genius Proxy\r\n\r\n"
         );
@@ -151,6 +152,7 @@ const establishedConnection = (
         proxySocket.pipe(clientSocket);
         clientSocket.pipe(proxySocket);
       } else {
+        console.log('connection failed', chunkStr, targetHostPort)
         const responseMessage = "Internal Server Error.";
         const responseHeaders = [
           "HTTP/1.1 500 Internal Server Error",
@@ -166,7 +168,7 @@ const establishedConnection = (
 
   proxySocket.on("close", () => {
     delete establishedConnections[targetHostPort];
-    console.log("proxySocket closed");
+    // console.log("proxySocket closed");
   });
 
   proxySocket.on("drain", () => {
