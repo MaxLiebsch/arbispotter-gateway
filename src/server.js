@@ -5,13 +5,14 @@ import "dotenv/config";
 import { config } from "dotenv";
 
 config({
-  path: [`.env.${process.env.NODE_ENV}`],
+  path: [`.env.${process.env.PROXY_TYPE}.${process.env.NODE_ENV}`, ".env"],
 });
 
 // Define your username and password
 const USERNAME = process.env.BASIC_AUTH_USERNAME;
 const PASSWORD = process.env.BASIC_AUTH_PASSWORD;
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.PORT || Number(process.env.LOCAL_PORT);
+
 
 const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
@@ -60,7 +61,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log("Forward proxy server running on port " + "8081");
+  console.log("Forward proxy server running on port " + process.env.LOCAL_PORT);
 });
 
 // Create a TCP server to handle CONNECT requests
@@ -109,16 +110,35 @@ server.on("connect", (req, clientSocket, head) => {
 
   // Handle errors on the client socket
   clientSocket.on("error", (err) => {
-    console.error("Client socket error:", err);
+    if (err.code === "EPIPE") {
+      console.error("EPIPE error: attempted to write to a closed socket");
+      clientSocket.end();
+    } else if (err.code === "ECONNABORTED") {
+      console.error("ECONNABORTED error: connection aborted");
+      clientSocket.end();
+    } else if (err.code === "ECONNRESET") {
+      console.error("ECONNRESET error: connection reset by peer");
+      clientSocket.end();
+    } else {
+      console.error("Socket error:", err);
+      clientSocket.end();
+    } 
   });
 });
 
-server.on('error', (error) => {
-  console.log('Proxy Server error:', error)
-})
+server.on("error", (error) => {
+  console.log("Proxy Server error:", error);
+});
 
-
-
+/**
+ * Handles an established connection between the client and the forward proxy.
+ *
+ * @param {net.Socket} clientSocket - The client socket.
+ * @param {URL} forwardProxyUrl - The URL of the forward proxy.
+ * @param {string} targetHostPort - The target host and port.
+ * @param {string} proxyConnectRequest - The CONNECT request with Basic Auth to the forward proxy.
+ * @param {Buffer} head - The head of the client socket.
+ */
 const establishedConnection = (
   clientSocket,
   forwardProxyUrl,
@@ -144,7 +164,7 @@ const establishedConnection = (
         chunkStr.toLowerCase().includes("ok") ||
         chunkStr.toLowerCase().includes("200")
       ) {
-        console.log('connection established', chunkStr, targetHostPort)
+        console.log("connection established: ", targetHostPort);
         clientSocket.write(
           "HTTP/1.1 200 Connection Established\r\nProxy-agent: Genius Proxy\r\n\r\n"
         );
@@ -152,7 +172,6 @@ const establishedConnection = (
         proxySocket.pipe(clientSocket);
         clientSocket.pipe(proxySocket);
       } else {
-        console.log('connection failed', chunkStr, targetHostPort)
         const responseMessage = "Internal Server Error.";
         const responseHeaders = [
           "HTTP/1.1 500 Internal Server Error",
@@ -167,6 +186,7 @@ const establishedConnection = (
   });
 
   proxySocket.on("close", () => {
+    clientSocket.end();
     delete establishedConnections[targetHostPort];
     // console.log("proxySocket closed");
   });
@@ -176,6 +196,7 @@ const establishedConnection = (
   });
 
   proxySocket.on("timeout", () => {
+    clientSocket.end();
     delete establishedConnections[targetHostPort];
     console.log("proxySocket timeout");
   });
@@ -195,6 +216,6 @@ const establishedConnection = (
   });
 };
 
-process.on('uncaughtException', function (err) {
-  console.log('Proxy Server uncaught Error', err.stack);
+process.on("uncaughtException", function (err) {
+  console.log("Proxy Server uncaught Error", err.stack);
 });
