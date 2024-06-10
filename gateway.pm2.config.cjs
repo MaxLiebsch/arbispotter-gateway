@@ -6,7 +6,7 @@ module.exports = {
       name: `gateway_v${version}`,
       script: "./src/server.js",
       exec_mode : "cluster_mode",
-      instances: "3",
+      instances: "4",
       env: {
         NODE_ENV: "production",
         PROXY_TYPE: "request",
