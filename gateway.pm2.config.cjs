@@ -10,7 +10,7 @@ module.exports = {
       instances: "4",
       env: {
         NODE_ENV: "production",
-        PROXY_TYPE: "request",
+        PROXY_TYPE: "mix",
         DEBUG: false,
         LOCAL_PORT: 8081
       },
@@ -20,10 +20,10 @@ module.exports = {
       script: "./src/server.js",
       exec_mode : "cluster_mode",
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
-      instances: "1",
+      instances: "2",
       env: {
         NODE_ENV: "production",
-        PROXY_TYPE: "gb",
+        PROXY_TYPE: "de",
         DEBUG: false,
         LOCAL_PORT: 8082
       },

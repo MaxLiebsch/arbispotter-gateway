@@ -6,10 +6,10 @@ module.exports = {
       name: `gateway_v${version}`,
       script: "./src/server.js",
       exec_mode: "cluster_mode",
-      instances: "3",
+      instances: "1",
       env: {
         NODE_ENV: "production",
-        PROXY_TYPE: "request",
+        PROXY_TYPE: "mix",
         DEBUG: false,
         LOCAL_PORT: 8081,
       },
@@ -21,7 +21,7 @@ module.exports = {
       instances: "1",
       env: {
         NODE_ENV: "production",
-        PROXY_TYPE: "gb",
+        PROXY_TYPE: "de",
         DEBUG: false,
         LOCAL_PORT: 8082,
       },
