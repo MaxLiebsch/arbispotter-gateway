@@ -13,7 +13,6 @@ const USERNAME = process.env.BASIC_AUTH_USERNAME;
 const PASSWORD = process.env.BASIC_AUTH_PASSWORD;
 const PORT = process.env.PORT || Number(process.env.LOCAL_PORT);
 
-
 const PROXY_USERNAME = process.env.PROXY_USERNAME;
 const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
 
@@ -122,7 +121,7 @@ server.on("connect", (req, clientSocket, head) => {
     } else {
       console.error("Socket error:", err);
       clientSocket.end();
-    } 
+    }
   });
 });
 

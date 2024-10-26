@@ -12,6 +12,7 @@
     "test": "cross-env NODE_ENV=development PROXY_TYPE=request DEBUG=true jest"
   },
   "dependencies": {
+    "arbispotter-gateway": "file:",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
