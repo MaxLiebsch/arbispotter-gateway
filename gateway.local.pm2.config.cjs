@@ -26,5 +26,18 @@ module.exports = {
         LOCAL_PORT: 8082,
       },
     },
+    {
+      name: `gateway3_v${version}`,
+      script: "./src/server.js",
+      exec_mode : "cluster_mode",
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+      instances: "1",
+      env: {
+        NODE_ENV: "production",
+        PROXY_TYPE: "de-p",
+        DEBUG: false,
+        LOCAL_PORT: 8083
+      },
+    },
   ],
 };

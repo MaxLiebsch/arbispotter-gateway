@@ -25,28 +25,17 @@ const proxyHosts = Object.entries(process.env).reduce((acc, [key, host]) => {
 
 const establishedConnections = {};
 
-const numberOfProxies = proxyHosts.length;
-let currProxyIdx = 0;
-
-const nextProxyUrlStr = () => {
-  // default one proxy
-  if (numberOfProxies === 1) {
-    return proxyHosts[0];
+function* nextProxyUrlStr() {
+  const hosts = proxyHosts;
+  let index = 0;
+  while (true) {
+    yield hosts[index];
+    index = (index + 1) % hosts.length
   }
+}
 
-  if (currProxyIdx === 0) {
-    currProxyIdx += 1;
-    return proxyHosts[0];
-  } else if (currProxyIdx === numberOfProxies) {
-    currProxyIdx = 0;
-    currProxyIdx += 1;
-    return proxyHosts[0];
-  } else {
-    const curr = currProxyIdx;
-    currProxyIdx += 1;
-    return proxyHosts[curr];
-  }
-};
+const iterator = nextProxyUrlStr();
+
 
 // Create a basic authentication header
 const basicAuthHeader = Buffer.from(`${USERNAME}:${PASSWORD}`).toString(
@@ -82,7 +71,8 @@ server.on("connect", (req, clientSocket, head) => {
 
   const targetHostPort = `${hostname}:${port}`;
 
-  const proxyUrlStr = nextProxyUrlStr();
+  const proxyUrlStr = iterator.next().value;
+  console.log('proxyUrlStr:', proxyUrlStr)
   const forwardProxyUrl = new URL(proxyUrlStr);
 
   const proxyAuth = Buffer.from(
