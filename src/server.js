@@ -72,7 +72,6 @@ server.on("connect", (req, clientSocket, head) => {
   const targetHostPort = `${hostname}:${port}`;
 
   const proxyUrlStr = iterator.next().value;
-  console.log('proxyUrlStr:', proxyUrlStr)
   const forwardProxyUrl = new URL(proxyUrlStr);
 
   const proxyAuth = Buffer.from(
